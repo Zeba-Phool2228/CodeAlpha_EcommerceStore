@@ -1,16 +1,43 @@
+from .models import Product, Order, OrderItem, Category
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Product, Order, OrderItem
 from .cart import Cart
 from .forms import SignUpForm, OrderForm
 
 
 def product_list(request):
+    category_slug = request.GET.get("category")
+    search = request.GET.get("search")
+    if search:
+        search = search.strip()
+
     products = Product.objects.filter(available=True)
-    return render(request, "store/product_list.html", {"products": products})
+
+    # Category Filter
+    if category_slug:
+        products = products.filter(category__slug=category_slug)
+
+    # Search Filter
+    if search:
+        products = products.filter(name__icontains=search)
+
+    categories = Category.objects.all()
+
+    featured_products = Product.objects.filter(
+        available=True,
+        featured=True
+    )[:3]
+
+    return render(request, "store/product_list.html", {
+        "products": products,
+        "categories": categories,
+        "featured_products": featured_products,
+        "selected_category": category_slug,
+        "search": search,
+    })
 
 
 def product_detail(request, pk):
