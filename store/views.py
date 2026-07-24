@@ -11,6 +11,8 @@ from .forms import SignUpForm, OrderForm
 def product_list(request):
     category_slug = request.GET.get("category")
     search = request.GET.get("search")
+    sort = request.GET.get("sort")
+
     if search:
         search = search.strip()
 
@@ -23,6 +25,22 @@ def product_list(request):
     # Search Filter
     if search:
         products = products.filter(name__icontains=search)
+
+    # Sorting
+    if sort == "price_low":
+        products = products.order_by("price")
+
+    elif sort == "price_high":
+        products = products.order_by("-price")
+
+    elif sort == "name_az":
+        products = products.order_by("name")
+
+    elif sort == "name_za":
+        products = products.order_by("-name")
+
+    elif sort == "newest":
+        products = products.order_by("-id")
 
     categories = Category.objects.all()
 
@@ -37,6 +55,7 @@ def product_list(request):
         "featured_products": featured_products,
         "selected_category": category_slug,
         "search": search,
+        "sort": sort,
     })
 
 
