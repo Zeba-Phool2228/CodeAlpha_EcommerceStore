@@ -3,6 +3,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models import Q
 
 from .models import (
     Product,
@@ -14,7 +15,6 @@ from .models import (
 )
 
 from .forms import SignUpForm, OrderForm
-
 
 def product_list(request):
     category_slug = request.GET.get("category")
@@ -30,9 +30,13 @@ def product_list(request):
     if category_slug:
         products = products.filter(category__slug=category_slug)
 
-    # Search Filter
+    # Professional Search Filter
     if search:
-        products = products.filter(name__icontains=search)
+        products = products.filter(
+            Q(name__icontains=search) |
+            Q(description__icontains=search) |
+            Q(category__name__icontains=search)
+        ).distinct()
 
     # Sorting
     if sort == "price_low":
@@ -69,7 +73,6 @@ def product_list(request):
             "sort": sort,
         },
     )
-
 
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
@@ -119,6 +122,46 @@ def cart_remove(request, product_id):
         messages.success(request, "Item removed from cart.")
     except CartItem.DoesNotExist:
         pass
+
+    return redirect("cart_detail")
+
+@login_required(login_url="login")
+def cart_increase(request, product_id):
+    cart = get_object_or_404(Cart, user=request.user)
+
+    item = get_object_or_404(
+        CartItem,
+        cart=cart,
+        product_id=product_id,
+    )
+
+    if item.quantity < item.product.stock:
+        item.quantity += 1
+        item.save()
+    else:
+        messages.warning(
+            request,
+            "No more stock available."
+        )
+
+    return redirect("cart_detail")
+
+
+@login_required(login_url="login")
+def cart_decrease(request, product_id):
+    cart = get_object_or_404(Cart, user=request.user)
+
+    item = get_object_or_404(
+        CartItem,
+        cart=cart,
+        product_id=product_id,
+    )
+
+    if item.quantity > 1:
+        item.quantity -= 1
+        item.save()
+    else:
+        item.delete()
 
     return redirect("cart_detail")
 

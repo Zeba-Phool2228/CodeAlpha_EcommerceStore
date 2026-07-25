@@ -13,10 +13,15 @@
     <div class="col-md-5">
         <h4>Order Summary</h4>
         <ul class="list-group mb-3">
-            {% for item in cart %}
+            {% for item in cart_items %}
             <li class="list-group-item d-flex justify-content-between">
-                {{ item.product.name }} x {{ item.quantity }}
-                <span>Rs. {{ item.total_price }}</span>
+                <span>
+                    {{ item.product.name }} × {{ item.quantity }}
+                </span>
+
+                <span>
+                    Rs. {{ item.get_total_price }}
+                </span>
             </li>
             {% endfor %}
         </ul>
