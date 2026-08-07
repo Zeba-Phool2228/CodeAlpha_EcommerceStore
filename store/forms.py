@@ -1,3 +1,4 @@
+import re
 from django import forms
 from django.contrib.auth.models import User
 from .models import Order
@@ -24,6 +25,43 @@ class SignUpForm(forms.ModelForm):
 
 
 class OrderForm(forms.ModelForm):
+
     class Meta:
         model = Order
-        fields = ["full_name", "address", "city", "phone"]
+        fields = [
+            "full_name",
+            "email",
+            "address",
+            "city",
+            "phone",
+        ]
+
+    def clean_full_name(self):
+        name = self.cleaned_data["full_name"].strip()
+
+        if len(name) < 3:
+            raise forms.ValidationError(
+                "Full name must contain at least 3 characters."
+            )
+
+        return name
+
+    def clean_address(self):
+        address = self.cleaned_data["address"].strip()
+
+        if len(address) < 10:
+            raise forms.ValidationError(
+                "Please enter a complete address."
+            )
+
+        return address
+
+    def clean_phone(self):
+        phone = self.cleaned_data["phone"].strip()
+
+        if not re.fullmatch(r"\d{11}", phone):
+            raise forms.ValidationError(
+                "Phone number must contain exactly 11 digits."
+            )
+
+        return phone

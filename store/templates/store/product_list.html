@@ -165,6 +165,8 @@ Home | CodeAlpha Store
 
     <div class="row g-4">
 
+        {% if products %}
+
         {% for product in products %}
 
         <div class="col-lg-3 col-md-4 col-sm-6">
@@ -212,13 +214,36 @@ Home | CodeAlpha Store
 
         </div>
 
-        {% empty %}
+        {% endfor %}
 
-        <div class="text-center">
-            <h3>No Products Available</h3>
+        {% else %}
+
+        <div class="col-12">
+
+            <div class="text-center py-5">
+
+                <h2>No Products Found</h2>
+
+                {% if search %}
+                <p>
+                    No products matched
+                    <strong>"{{ search }}"</strong>.
+                </p>
+                {% else %}
+                <p>No products are available.</p>
+                {% endif %}
+
+                <a href="{% url 'product_list' %}" class="btn btn-primary mt-3">
+
+                    View All Products
+
+                </a>
+
+            </div>
+
         </div>
 
-        {% endfor %}
+        {% endif %}
 
     </div>
 

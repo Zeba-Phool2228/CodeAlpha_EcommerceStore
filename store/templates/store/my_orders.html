@@ -1,23 +1,193 @@
 {% extends "store/base.html" %}
 
-{% block content %}
-<h2 class="mb-4">My Orders</h2>
+{% block title %}My Orders | CodeAlpha Store{% endblock %}
 
-{% if orders %}
-{% for order in orders %}
-<div class="card mb-3">
-    <div class="card-body">
-        <h5>Order #{{ order.id }} — Rs. {{ order.get_total_cost }}</h5>
-        <p class="text-muted">Placed on {{ order.created_at|date:"d M Y, h:i A" }}</p>
-        <ul>
-            {% for item in order.items.all %}
-            <li>{{ item.product.name }} x {{ item.quantity }} — Rs. {{ item.get_cost }}</li>
-            {% endfor %}
-        </ul>
+{% block content %}
+
+<div class="container py-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-bag-check text-primary"></i>
+                My Orders
+            </h2>
+
+            <p class="text-muted mb-0">
+                View and manage your orders
+            </p>
+        </div>
+
+        <a href="{% url 'product_list' %}" class="btn btn-outline-primary mt-2 mt-md-0">
+            <i class="bi bi-shop"></i>
+            Continue Shopping
+        </a>
+
     </div>
+
+
+    {% if orders %}
+
+    {% for order in orders %}
+
+    <div class="card order-card mb-4 shadow-sm">
+
+        <div class="card-body p-4">
+
+            <!-- Order Header -->
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+                <div>
+
+                    <h5 class="fw-bold mb-2">
+
+                        Order #{{ order.id }}
+
+                        {% if order.status == "Pending" %}
+
+                        <span class="badge bg-warning text-dark ms-2">
+                            Pending
+                        </span>
+
+                        {% elif order.status == "Processing" %}
+
+                        <span class="badge bg-info text-dark ms-2">
+                            Processing
+                        </span>
+
+                        {% elif order.status == "Shipped" %}
+
+                        <span class="badge bg-primary ms-2">
+                            Shipped
+                        </span>
+
+                        {% elif order.status == "Delivered" %}
+
+                        <span class="badge bg-success ms-2">
+                            Delivered
+                        </span>
+
+                        {% elif order.status == "Cancelled" %}
+
+                        <span class="badge bg-danger ms-2">
+                            Cancelled
+                        </span>
+
+                        {% endif %}
+
+                    </h5>
+
+
+                    <div class="text-muted small">
+
+                        <i class="bi bi-calendar3"></i>
+
+                        Placed on
+                        {{ order.created_at|date:"d M Y, h:i A" }}
+
+                        <span class="mx-2">•</span>
+
+                        <i class="bi bi-box"></i>
+
+                        {{ order.items.count }}
+                        product{{ order.items.count|pluralize }}
+
+                    </div>
+
+                </div>
+
+
+                <!-- Total -->
+                <div class="text-end">
+
+                    <small class="text-muted d-block">
+                        Order Total
+                    </small>
+
+                    <h5 class="fw-bold text-warning mb-0">
+                        Rs. {{ order.get_total_cost }}
+                    </h5>
+
+                </div>
+
+            </div>
+
+
+            <hr class="my-4">
+
+
+            <!-- Order Actions -->
+            <div class="d-flex flex-wrap gap-2">
+
+                <!-- View Details -->
+                <a href="{% url 'order_detail' order.id %}" class="btn btn-primary">
+
+                    <i class="bi bi-eye"></i>
+
+                    View Details
+
+                </a>
+
+
+                <!-- Cancel Order -->
+                {% if order.can_be_cancelled %}
+
+                <form method="POST" action="{% url 'cancel_order' order.id %}"
+                    onsubmit="return confirm('Are you sure you want to cancel Order #{{ order.id }}?');">
+
+                    {% csrf_token %}
+
+                    <button type="submit" class="btn btn-outline-danger">
+
+                        <i class="bi bi-x-circle"></i>
+
+                        Cancel Order
+
+                    </button>
+
+                </form>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+
+    {% else %}
+
+    <!-- No Orders -->
+    <div class="text-center py-5">
+
+        <i class="bi bi-bag-x display-1 text-secondary"></i>
+
+        <h2 class="fw-bold mt-4">
+            No Orders Yet
+        </h2>
+
+        <p class="text-muted mb-4">
+            You haven't placed any orders yet.
+            Start shopping now!
+        </p>
+
+        <a href="{% url 'product_list' %}" class="btn btn-warning btn-lg px-4">
+
+            <i class="bi bi-bag"></i>
+
+            Browse Products
+
+        </a>
+
+    </div>
+
+    {% endif %}
+
 </div>
-{% endfor %}
-{% else %}
-<p>You haven't placed any orders yet.</p>
-{% endif %}
+
 {% endblock %}

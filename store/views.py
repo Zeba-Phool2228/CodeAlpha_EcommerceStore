@@ -16,13 +16,11 @@ from .models import (
 
 from .forms import SignUpForm, OrderForm
 
+
 def product_list(request):
     category_slug = request.GET.get("category")
-    search = request.GET.get("search")
     sort = request.GET.get("sort")
-
-    if search:
-        search = search.strip()
+    search = request.GET.get("search", "").strip()
 
     products = Product.objects.filter(available=True)
 
@@ -30,12 +28,14 @@ def product_list(request):
     if category_slug:
         products = products.filter(category__slug=category_slug)
 
-    # Professional Search Filter
+    # Search Filter
     if search:
         products = products.filter(
             Q(name__icontains=search) |
             Q(description__icontains=search) |
-            Q(category__name__icontains=search)
+            Q(category__name__icontains=search) |
+            Q(brand__icontains=search) |
+            Q(sku__icontains=search)
         ).distinct()
 
     # Sorting
@@ -74,6 +74,7 @@ def product_list(request):
         },
     )
 
+
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
 
@@ -84,6 +85,8 @@ def product_detail(request, pk):
             "product": product,
         },
     )
+
+
 def cart_add(request, product_id):
     if not request.user.is_authenticated:
         messages.warning(request, "Please login first.")
@@ -124,6 +127,7 @@ def cart_remove(request, product_id):
         pass
 
     return redirect("cart_detail")
+
 
 @login_required(login_url="login")
 def cart_increase(request, product_id):
@@ -244,7 +248,10 @@ def checkout_view(request):
 
         if form.is_valid():
             order = form.save(commit=False)
+
             order.user = request.user
+            order.email = form.cleaned_data["email"]
+
             order.save()
 
             for item in cart.items.all():
@@ -306,3 +313,47 @@ def my_orders(request):
             "orders": orders,
         },
     )
+
+
+@login_required(login_url="login")
+def order_detail(request, order_id):
+
+    order = get_object_or_404(
+        Order,
+        id=order_id,
+        user=request.user,
+    )
+
+    return render(
+        request,
+        "store/order_detail.html",
+        {
+            "order": order,
+        },
+    )
+
+@login_required(login_url="login")
+def cancel_order(request, order_id):
+
+    order = get_object_or_404(
+        Order,
+        id=order_id,
+        user=request.user,
+    )
+
+    if order.can_be_cancelled:
+        order.status = "Cancelled"
+        order.save()
+
+        messages.success(
+            request,
+            f"Order #{order.id} has been cancelled successfully."
+        )
+
+    else:
+        messages.error(
+            request,
+            f"Order #{order.id} can no longer be cancelled."
+        )
+
+    return redirect("my_orders")

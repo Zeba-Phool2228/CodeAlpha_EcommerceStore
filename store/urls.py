@@ -8,13 +8,10 @@ urlpatterns = [
     path("cart/add/<int:product_id>/", views.cart_add, name="cart_add"),
     path("cart/remove/<int:product_id>/",
          views.cart_remove, name="cart_remove"),
-
-    # NEW URLS
     path("cart/increase/<int:product_id>/",
          views.cart_increase, name="cart_increase"),
     path("cart/decrease/<int:product_id>/",
          views.cart_decrease, name="cart_decrease"),
-
     path("cart/", views.cart_detail, name="cart_detail"),
 
     path("signup/", views.signup_view, name="signup"),
@@ -30,4 +27,16 @@ urlpatterns = [
     ),
 
     path("my-orders/", views.my_orders, name="my_orders"),
+
+    path(
+        "order/<int:order_id>/",
+        views.order_detail,
+        name="order_detail",
+    ),
+
+    path(
+        "order/cancel/<int:order_id>/",
+        views.cancel_order,
+        name="cancel_order",
+    ),
 ]

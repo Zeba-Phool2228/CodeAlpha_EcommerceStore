@@ -188,8 +188,15 @@ class CartItem(models.Model):
 # ORDER MODELS
 # ======================================================
 
-
 class Order(models.Model):
+
+    STATUS_CHOICES = [
+        ("Pending", "Pending"),
+        ("Processing", "Processing"),
+        ("Shipped", "Shipped"),
+        ("Delivered", "Delivered"),
+        ("Cancelled", "Cancelled"),
+    ]
 
     user = models.ForeignKey(
         User,
@@ -213,6 +220,8 @@ class Order(models.Model):
         max_length=20
     )
 
+    email = models.EmailField()
+
     created_at = models.DateTimeField(
         auto_now_add=True
     )
@@ -221,11 +230,24 @@ class Order(models.Model):
         default=False
     )
 
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="Pending"
+    )
+
     def __str__(self):
         return f"Order #{self.id} - {self.full_name}"
 
     def get_total_cost(self):
-        return sum(item.get_cost() for item in self.items.all())
+        return sum(
+            item.get_cost()
+            for item in self.items.all()
+        )
+
+    @property
+    def can_be_cancelled(self):
+        return self.status in ["Pending", "Processing"]
 
 
 class OrderItem(models.Model):

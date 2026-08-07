@@ -1,31 +1,369 @@
 {% extends "store/base.html" %}
-
+{% block title %}Checkout | CodeAlpha Store{% endblock %}
 {% block content %}
-<div class="row">
-    <div class="col-md-7">
-        <h2 class="mb-4">Checkout</h2>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-success">Place Order</button>
-        </form>
-    </div>
-    <div class="col-md-5">
-        <h4>Order Summary</h4>
-        <ul class="list-group mb-3">
-            {% for item in cart_items %}
-            <li class="list-group-item d-flex justify-content-between">
-                <span>
-                    {{ item.product.name }} × {{ item.quantity }}
-                </span>
+<style>
+    .checkout-title {
+        font-size: 26px;
+        font-weight: 700;
+        color: #222;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-                <span>
-                    Rs. {{ item.get_total_price }}
-                </span>
-            </li>
-            {% endfor %}
-        </ul>
-        <h5>Total: Rs. {{ cart.get_total_price }}</h5>
+    .checkout-title i {
+        color: #ff9800;
+        font-size: 28px;
+    }
+
+    .checkout-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .06) !important;
+        background: #fff;
+        overflow: hidden;
+    }
+
+    .checkout-card-header {
+        border-bottom: 1px solid #eee;
+        padding: 18px 20px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .checkout-section-icon {
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        border-radius: 12px;
+        background: #fff3e0;
+        color: #ff9800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+
+    /* FORM INPUT FIXES - Ensure Full Width & Consistent Look */
+    .form-group-custom {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .form-group-custom label {
+        font-weight: 600;
+        font-size: 14px;
+        color: #333;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .form-group-custom input,
+    .form-group-custom textarea,
+    .form-group-custom select {
+        width: 100% !important;
+        display: block !important;
+        padding: 10px 14px !important;
+        font-size: 14px !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 8px !important;
+        background-color: #fff !important;
+        outline: none !important;
+        box-shadow: none !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    }
+
+    .form-group-custom input:focus,
+    .form-group-custom textarea:focus,
+    .form-group-custom select:focus {
+        border-color: #ff9800 !important;
+        box-shadow: 0 0 0 0.2rem rgba(255, 152, 0, 0.25) !important;
+    }
+
+    /* ORDER SUMMARY STYLES */
+    .checkout-item-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 14px;
+        margin-bottom: 14px;
+        border-bottom: 1px solid #f1f1f1;
+        gap: 12px;
+    }
+
+    .checkout-item-row:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .checkout-product-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+    }
+
+    .checkout-product-image-box {
+        width: 64px !important;
+        height: 64px !important;
+        min-width: 64px !important;
+        max-width: 64px !important;
+        max-height: 64px !important;
+        border-radius: 10px !important;
+        overflow: hidden !important;
+        background: #f5f5f5;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+    }
+
+    .checkout-thumb {
+        width: 64px !important;
+        height: 64px !important;
+        max-width: 64px !important;
+        max-height: 64px !important;
+        object-fit: cover !important;
+        display: block !important;
+    }
+
+    .checkout-product-placeholder {
+        color: #ccc;
+        font-size: 24px;
+    }
+
+    .checkout-product-info {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .checkout-product-name {
+        font-weight: 600;
+        color: #222;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 180px;
+    }
+
+    .checkout-price {
+        font-weight: 600;
+        color: #222;
+        white-space: nowrap;
+    }
+
+    .checkout-badge-qty {
+        display: inline-block;
+        background: #f1f1f1;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 12px;
+        color: #555;
+    }
+
+    .checkout-summary-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .06) !important;
+        background: #fff;
+    }
+
+    .order-summary-sticky {
+        position: sticky;
+        top: 20px;
+    }
+
+    .cod-alert-box {
+        background: #fffaf0;
+        border: 1px solid #ffe8cc !important;
+        border-radius: 12px;
+        padding: 14px 16px;
+    }
+
+    .btn-place-order {
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 12px 20px;
+        font-size: 16px;
+    }
+
+    @media (max-width: 767px) {
+        .checkout-product-name {
+            max-width: 120px;
+        }
+
+        .order-summary-sticky {
+            position: static;
+        }
+    }
+</style>
+
+<div class="container py-4 py-lg-5">
+    <h2 class="checkout-title mb-4">
+        <i class="bi bi-credit-card"></i>
+        Checkout
+    </h2>
+
+    <div class="row g-4">
+        <!-- LEFT: Customer Details Form -->
+        <div class="col-lg-7">
+            <div class="card checkout-card">
+                <div class="checkout-card-header">
+                    <div class="checkout-section-icon">
+                        <i class="bi bi-person-lines-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">Delivery Details</h5>
+                        <small class="text-muted">Enter your shipping information</small>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Full Name -->
+                        <div class="form-group-custom mb-3">
+                            <label>Full Name</label>
+                            {{ form.full_name }}
+                            {% if form.full_name.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.full_name.errors|striptags }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Email Address -->
+                        <div class="form-group-custom mb-3">
+                            <label>Email Address</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.email.errors|striptags }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Delivery Address -->
+                        <div class="form-group-custom mb-3">
+                            <label>Delivery Address</label>
+                            {{ form.address }}
+                            {% if form.address.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.address.errors|striptags }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- City & Phone Number side-by-side -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label>City</label>
+                                    {{ form.city }}
+                                    {% if form.city.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.city.errors|striptags }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label>Phone Number</label>
+                                    {{ form.phone }}
+                                    {% if form.phone.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.phone.errors|striptags }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="cod-alert-box d-flex align-items-center mt-4 mb-4">
+                            <i class="bi bi-truck fs-4 me-3 text-warning"></i>
+                            <div class="text-secondary small fw-semibold">
+                                Cash on Delivery — pay when your order arrives.
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-warning btn-lg w-100 btn-place-order">
+                            <i class="bi bi-bag-check me-1"></i>
+                            Place Order
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Order Summary -->
+        <div class="col-lg-5">
+            <div class="card checkout-summary-card order-summary-sticky">
+                <div class="checkout-card-header">
+                    <div class="checkout-section-icon">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">Order Summary</h5>
+                        <small class="text-muted">Items in your cart</small>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        {% for item in cart_items %}
+                        <div class="checkout-item-row">
+                            <div class="checkout-product-wrapper">
+                                {% if item.product.image %}
+                                <div class="checkout-product-image-box">
+                                    <img src="{{ item.product.image.url }}" class="checkout-thumb"
+                                        style="width:64px !important; height:64px !important; max-width:64px !important; max-height:64px !important; object-fit:cover !important;"
+                                        alt="{{ item.product.name }}">
+                                </div>
+                                {% else %}
+                                <div class="checkout-product-image-box checkout-product-placeholder">
+                                    <i class="bi bi-image"></i>
+                                </div>
+                                {% endif %}
+                                <div class="checkout-product-info">
+                                    <div class="checkout-product-name" title="{{ item.product.name }}">
+                                        {{ item.product.name }}
+                                    </div>
+                                    <div class="mt-1">
+                                        <span class="checkout-badge-qty">
+                                            Qty: {{ item.quantity }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checkout-price">
+                                Rs. {{ item.get_total_price }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal</span>
+                        <span class="fw-semibold">Rs. {{ cart.get_total_price }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Delivery</span>
+                        <span class="text-success fw-semibold">Free</span>
+                    </div>
+                    <hr class="my-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold">Total</h5>
+                        <h4 class="text-warning mb-0 fw-bold">Rs. {{ cart.get_total_price }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
