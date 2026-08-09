@@ -6,59 +6,165 @@ Home | CodeAlpha Store
 
 {% block content %}
 
-<!-- Hero Section: Compact Dark Professional Theme -->
-<section class="hero-section position-relative overflow-hidden">
+<!-- =====================================================
+     PROFESSIONAL HERO SECTION
+====================================================== -->
+
+<section class="hero-section">
+
     <div class="hero-overlay"></div>
+
     <div class="hero-content position-relative">
-        <h1>Discover Amazing Products</h1>
-        <p>Premium Quality Products at the Best Prices. Built with efficiency and fast delivery.</p>
-        <a href="#products" class="btn btn-warning btn-md fw-bold px-4">Shop Now</a>
+
+        <span class="hero-eyebrow">
+            <i class="bi bi-stars me-1"></i>
+            CODEALPHA STORE
+        </span>
+
+        <h1>
+            Premium Products.<br>
+            Better Shopping Experience.
+        </h1>
+
+        <p>
+            Discover quality products at competitive prices,
+            with a simple and reliable shopping experience.
+        </p>
+
+        <div class="hero-actions">
+
+            <a href="#products" class="btn btn-warning hero-primary-btn">
+                <i class="bi bi-bag-check me-2"></i>
+                Explore Products
+            </a>
+
+            <a href="#categories" class="btn hero-secondary-btn">
+                <i class="bi bi-grid me-2"></i>
+                View Categories
+            </a>
+
+        </div>
+
     </div>
+
 </section>
 
-<!-- Categories Section -->
-<section class="categories-section" id="categories">
+
+<!-- =====================================================
+     CATEGORIES SECTION
+====================================================== -->
+
+<section id="categories" class="categories-section">
+
     <div class="text-center mb-5">
-        <h2 class="section-title">Shop by Category</h2>
-        <p class="section-subtitle">Explore our product categories</p>
+
+        <span class="section-eyebrow">
+            SHOP BY CATEGORY
+        </span>
+
+        <h2 class="section-title">
+            Explore Our Categories
+        </h2>
+
+        <p class="section-subtitle">
+            Find the products you need from our organized categories.
+        </p>
+
     </div>
+
 
     <div class="row g-4">
+
         {% for category in categories %}
+
         <div class="col-lg-3 col-md-6">
-            <a href="{% url 'product_list' %}?category={{ category.slug }}" class="text-decoration-none">
-                <div class="category-card {% if selected_category == category.slug %}active-category{% endif %}">
-                    <i class="bi {{ category.icon }} category-icon"></i>
-                    <h5>{{ category.name }}</h5>
-                    <p>{{ category.products.count }} Products</p>
+
+            <a href="{% url 'product_list' %}?category={{ category.slug }}"
+               class="text-decoration-none">
+
+                <div class="category-card
+                    {% if selected_category == category.slug %}
+                    active-category
+                    {% endif %}">
+
+                    <div class="category-icon-wrapper">
+
+                        <i class="bi {{ category.icon }} category-icon"></i>
+
+                    </div>
+
+                    <h5>
+                        {{ category.name }}
+                    </h5>
+
+                    <p>
+                        {{ category.products.count }} Products
+                    </p>
+
                 </div>
+
             </a>
+
         </div>
+
         {% empty %}
-        <p class="text-center text-muted">
-            No categories added yet. Add some from the Admin panel.
-        </p>
+
+        <div class="col-12">
+
+            <p class="text-center text-muted">
+                No categories added yet. Add some from the Admin panel.
+            </p>
+
+        </div>
+
         {% endfor %}
+
     </div>
+
 
     {% if selected_category %}
+
     <div class="text-center mt-4">
-        <a href="{% url 'product_list' %}" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-x-circle"></i>
+
+        <a href="{% url 'product_list' %}"
+           class="btn btn-outline-secondary btn-sm">
+
+            <i class="bi bi-x-circle me-1"></i>
             Clear Filter
+
         </a>
+
     </div>
+
     {% endif %}
+
 </section>
 
-<!-- Best Sellers -->
+
+<!-- =====================================================
+     FEATURED / BEST SELLERS
+====================================================== -->
+
 {% if featured_products %}
+
 <section class="best-seller-section">
 
     <div class="text-center mb-5">
-        <h2 class="section-title">Best Sellers</h2>
-        <p class="section-subtitle">Hand-picked popular products</p>
+
+        <span class="section-eyebrow">
+            FEATURED COLLECTION
+        </span>
+
+        <h2 class="section-title">
+            Best Sellers
+        </h2>
+
+        <p class="section-subtitle">
+            Hand-picked products selected for our customers.
+        </p>
+
     </div>
+
 
     <div class="row g-4">
 
@@ -68,34 +174,71 @@ Home | CodeAlpha Store
 
             <div class="best-card d-flex flex-column h-100 flex-fill">
 
-                <span class="sale-badge">FEATURED</span>
+                <span class="sale-badge">
+                    FEATURED
+                </span>
+
 
                 <div class="best-img-box">
+
                     {% if product.image %}
-                    <img src="{{ product.image.url }}" class="best-image" alt="{{ product }}">
+
+                    <img src="{{ product.image.url }}"
+                         class="best-image"
+                         alt="{{ product.name }}">
+
+                    {% else %}
+
+                    <div class="image-placeholder">
+                        <i class="bi bi-image"></i>
+                    </div>
+
                     {% endif %}
+
                 </div>
+
 
                 <div class="p-4 d-flex flex-column flex-grow-1">
 
                     <h4 class="product-title">
-                        <a href="{% url 'product_detail' product.id %}" class="text-dark text-decoration-none">
+
+                        <a href="{% url 'product_detail' product.id %}"
+                           class="text-decoration-none">
+
                             {{ product.name }}
+
                         </a>
+
                     </h4>
 
-                    <p class="product-desc">{{ product.description|truncatechars:60 }}</p>
 
-                    <!-- Bottom Group Locked Together -->
+                    <p class="product-desc">
+
+                        {{ product.description|truncatechars:60 }}
+
+                    </p>
+
+
                     <div class="card-bottom-group mt-auto pt-3 border-top">
+
                         <div class="d-flex justify-content-between align-items-center">
+
                             <h5 class="price mb-0">
+
                                 Rs. {{ product.price }}
+
                             </h5>
-                            <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-dark">
-                                View Detail
+
+
+                            <a href="{% url 'product_detail' product.id %}"
+                               class="btn btn-sm btn-outline-dark">
+
+                                View Details
+
                             </a>
+
                         </div>
+
                     </div>
 
                 </div>
@@ -109,59 +252,115 @@ Home | CodeAlpha Store
     </div>
 
 </section>
+
 {% endif %}
 
-<!-- Products Section -->
-<section id="products" class="mt-5">
 
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+<!-- =====================================================
+     PRODUCTS SECTION
+====================================================== -->
 
-        <h2 class="fw-bold">
-            {% if selected_category %}
-            {{ selected_category|title }} Products
-            {% else %}
-            All Products
-            {% endif %}
-        </h2>
+<section id="products" class="products-section">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+        <div>
+
+            <span class="section-eyebrow">
+                OUR COLLECTION
+            </span>
+
+            <h2 class="fw-bold mb-1">
+
+                {% if selected_category %}
+
+                {{ selected_category|title }} Products
+
+                {% else %}
+
+                All Products
+
+                {% endif %}
+
+            </h2>
+
+            <p class="text-muted mb-0">
+                Browse our available products.
+            </p>
+
+        </div>
+
 
         <div class="d-flex align-items-center">
 
             <span class="me-3 text-muted">
+
                 {{ products|length }} Products Available
+
             </span>
+
 
             <form method="GET">
 
                 {% if selected_category %}
-                <input type="hidden" name="category" value="{{ selected_category }}">
+
+                <input type="hidden"
+                       name="category"
+                       value="{{ selected_category }}">
+
                 {% endif %}
+
 
                 {% if search %}
-                <input type="hidden" name="search" value="{{ search }}">
+
+                <input type="hidden"
+                       name="search"
+                       value="{{ search }}">
+
                 {% endif %}
 
-                <select class="form-select" name="sort" onchange="this.form.submit()">
 
-                    <option value="">Sort By</option>
+                <select class="form-select"
+                        name="sort"
+                        onchange="this.form.submit()">
 
-                    <option value="price_low" {% if sort == "price_low" %}selected{% endif %}>
+                    <option value="">
+                        Sort By
+                    </option>
+
+                    <option value="price_low"
+                        {% if sort == "price_low" %}selected{% endif %}>
+
                         Price: Low → High
+
                     </option>
 
-                    <option value="price_high" {% if sort == "price_high" %}selected{% endif %}>
+                    <option value="price_high"
+                        {% if sort == "price_high" %}selected{% endif %}>
+
                         Price: High → Low
+
                     </option>
 
-                    <option value="name_az" {% if sort == "name_az" %}selected{% endif %}>
+                    <option value="name_az"
+                        {% if sort == "name_az" %}selected{% endif %}>
+
                         Name: A → Z
+
                     </option>
 
-                    <option value="name_za" {% if sort == "name_za" %}selected{% endif %}>
+                    <option value="name_za"
+                        {% if sort == "name_za" %}selected{% endif %}>
+
                         Name: Z → A
+
                     </option>
 
-                    <option value="newest" {% if sort == "newest" %}selected{% endif %}>
+                    <option value="newest"
+                        {% if sort == "newest" %}selected{% endif %}>
+
                         Newest
+
                     </option>
 
                 </select>
@@ -171,6 +370,7 @@ Home | CodeAlpha Store
         </div>
 
     </div>
+
 
     <div class="row g-4">
 
@@ -182,43 +382,90 @@ Home | CodeAlpha Store
 
             <div class="product-card d-flex flex-column h-100 flex-fill">
 
+
                 {% if product.image %}
+
                 <div class="product-img-box">
-                    <img src="{{ product.image.url }}" class="product-image" alt="{{ product.name }}">
+
+                    <img src="{{ product.image.url }}"
+                         class="product-image"
+                         alt="{{ product.name }}">
+
                 </div>
+
+                {% else %}
+
+                <div class="product-img-box">
+
+                    <div class="image-placeholder">
+
+                        <i class="bi bi-image"></i>
+
+                    </div>
+
+                </div>
+
                 {% endif %}
+
 
                 <div class="p-3 d-flex flex-column flex-grow-1">
 
-                    <!-- Title -->
+
+                    <!-- PRODUCT TITLE -->
+
                     <h5 class="product-title">
+
                         <a href="{% url 'product_detail' product.id %}">
+
                             {{ product.name }}
+
                         </a>
+
                     </h5>
 
-                    <!-- Description -->
+
+                    <!-- PRODUCT DESCRIPTION -->
+
                     <p class="product-desc">
+
                         {{ product.description|truncatechars:70 }}
+
                     </p>
 
-                    <!-- PRICE + STOCK + ADD TO CART LOCKED AT BOTTOM IN SEQUENCE -->
+
+                    <!-- PRICE / STOCK / CART -->
+
                     <div class="card-bottom-group mt-auto pt-2">
 
                         <h4 class="price mb-1">
+
                             Rs. {{ product.price }}
+
                         </h4>
 
+
                         <small class="text-success mb-2 d-block fw-semibold">
+
+                            <i class="bi bi-check-circle me-1"></i>
+
                             In Stock ({{ product.stock }})
+
                         </small>
 
-                        <form action="{% url 'cart_add' product.id %}" method="POST">
+
+                        <form action="{% url 'cart_add' product.id %}"
+                              method="POST">
+
                             {% csrf_token %}
+
                             <button class="btn btn-warning w-100 fw-bold py-2">
-                                <i class="bi bi-cart-plus"></i>
+
+                                <i class="bi bi-cart-plus me-1"></i>
+
                                 Add to Cart
+
                             </button>
+
                         </form>
 
                     </div>
@@ -231,23 +478,54 @@ Home | CodeAlpha Store
 
         {% endfor %}
 
+
         {% else %}
 
         <div class="col-12">
-            <div class="text-center py-5">
-                <h2>No Products Found</h2>
+
+            <div class="empty-products text-center py-5">
+
+                <div class="empty-products-icon">
+
+                    <i class="bi bi-search"></i>
+
+                </div>
+
+
+                <h2>
+                    No Products Found
+                </h2>
+
+
                 {% if search %}
+
                 <p>
+
                     No products matched
                     <strong>"{{ search }}"</strong>.
+
                 </p>
+
                 {% else %}
-                <p>No products are available.</p>
+
+                <p>
+                    No products are currently available.
+                </p>
+
                 {% endif %}
-                <a href="{% url 'product_list' %}" class="btn btn-primary mt-3">
+
+
+                <a href="{% url 'product_list' %}"
+                   class="btn btn-primary mt-3">
+
+                    <i class="bi bi-grid me-1"></i>
+
                     View All Products
+
                 </a>
+
             </div>
+
         </div>
 
         {% endif %}
