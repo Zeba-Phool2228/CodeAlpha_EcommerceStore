@@ -39,4 +39,7 @@ urlpatterns = [
         views.cancel_order,
         name="cancel_order",
     ),
+
+    path("profile/", views.profile_view, name="profile"),
+    path("contact/", views.contact_view, name="contact"),
 ]

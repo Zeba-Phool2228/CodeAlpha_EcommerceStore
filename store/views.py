@@ -332,6 +332,7 @@ def order_detail(request, order_id):
         },
     )
 
+
 @login_required(login_url="login")
 def cancel_order(request, order_id):
 
@@ -357,3 +358,20 @@ def cancel_order(request, order_id):
         )
 
     return redirect("my_orders")
+
+
+@login_required(login_url="login")
+def profile_view(request):
+    orders_count = Order.objects.filter(user=request.user).count()
+
+    return render(
+        request,
+        "store/profile.html",
+        {
+            "orders_count": orders_count,
+        },
+    )
+
+
+def contact_view(request):
+    return render(request, "store/contact.html")
